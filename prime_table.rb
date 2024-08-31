@@ -33,6 +33,7 @@ class PrimeTable
   end
   
   def upper_limit
+    @upper_limit = 6 if n < 4 
     @upper_limit ||= (n * (ln(n) + ln(ln(n)))).to_i
   end
   
@@ -76,16 +77,13 @@ end
 require 'rspec'
 
 describe PrimeTable do
-  before do
-    @prime_table = PrimeTable.new n
-  end
-
+  let(:prime_table) { PrimeTable.new n }
   let(:n) { 10 }
   
   describe :to_s do
     it 'should print a well formatted table' do
-      expect(@prime_table).to receive(:primes).at_least(:once).and_return [2, 100, 1000]
-      expect(@prime_table.to_s).to eq [
+      expect(prime_table).to receive(:primes).at_least(:once).and_return [2, 100, 1000]
+      expect(prime_table.to_s).to eq [
         "        2    100    1000",
         "   2    4    200    2000",
         " 100  200  10000  100000",
@@ -94,7 +92,7 @@ describe PrimeTable do
     end
   
     it 'should print a well formatted table with 10 primes' do
-      expect(@prime_table.to_s).to eq [
+      expect(prime_table.to_s).to eq [
         "    2  3   5   7  11  13  17  19  23  29",
         " 2  4  6  10  14  22  26  34  38  46  58",
         " 3  6  9  15  21  33  39  51  57  69  87",
@@ -112,14 +110,57 @@ describe PrimeTable do
 
   describe :primes do
     it 'should calculate primes' do
-      expect(@prime_table.primes).to eq [2,3,5,7,11,13,17,19,23,29]
+      expect(prime_table.primes).to eq [2,3,5,7,11,13,17,19,23,29]
+    end
+
+    context "with small values for n" do
+      context "when n is 0" do
+        let(:n) { 0 }
+
+        it 'calculates primes' do
+          expect(prime_table.primes).to eq []
+        end
+      end
+
+      context "when n is 1" do
+        let(:n) { 1 }
+
+        it 'calculates primes' do
+          expect(prime_table.primes).to eq [2]
+        end
+      end
+
+      context "when n is 2" do
+        let(:n) { 2 }
+
+        it 'calculates primes' do
+          expect(prime_table.primes).to eq [2,3]
+        end
+      end
+
+      context "when n is 3" do
+        let(:n) { 3 }
+
+        it 'calculates primes' do
+          expect(prime_table.primes).to eq [2,3,5]
+        end
+      end
+
+    end
+
+    context "when n is small" do
+      let(:n) { 3 }
+
+      it 'calculates primes' do
+        expect(prime_table.primes).to eq [2,3,5]
+      end
     end
   
     context "when n is large-ish" do
       let(:n) { 1000 }
 
       it 'should calculate a lot of primes' do
-        expect(@prime_table.primes).to eq(
+        expect(prime_table.primes).to eq(
           "2      3      5      7     11     13     17     19     23     29 
           31     37     41     43     47     53     59     61     67     71 
           73     79     83     89     97    101    103    107    109    113 
@@ -228,11 +269,11 @@ describe PrimeTable do
       let(:n) { 5000 }
 
       it 'should scale and match the results from Prime.each' do
-        expect(@prime_table.primes).to eq Prime.each(48611).to_a
+        expect(prime_table.primes).to eq Prime.each(48611).to_a
       end
     end
   end
 end
 
-prime_table = PrimeTable.new (ARGV[0] || 10).to_i
-prime_table.print
+# prime_table = PrimeTable.new (ARGV[0] || 10).to_i
+# prime_table.print
